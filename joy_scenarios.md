@@ -3,15 +3,15 @@
 The user will initiate a chat stating they want to cook something but only have a specific set of ingredients. The LLM (acting as a "kitchen assistant") will ask the user to list everything they have available, including items in their fridge and pantry. A critical step is that the LLM will then prompt for common staples that users often forget to list (e.g., "Do you also have basics like salt, pepper, cooking oil, flour, or sugar?"). Once the user confirms the complete list, the LLM will analyze the ingredients and search its knowledge base for a recipe that uses only those items (or a subset). It will then present a recipe with a title, a final ingredient list, and manageable, step-by-step instructions. The user can then ask follow-up questions for clarification (e.g., "How high should the heat be?").
 
 **Step-by-step break down:**
-<span style = 'color: #4171bf'>User: "I'm hungry. What can I make with what I have?"</span>
-<span style = 'color: #40a33e'>KitchenAssistant: "I can help with that! Please list all the ingredients you have in your fridge and pantry."</span>
-<span style = 'color: #4171bf'>User: "Okay, I have two chicken breasts, an onion, a can of black beans, and some shredded cheddar cheese."</span>
-<span style = 'color: #40a33e'>KitchenAssistant: "Got it. And do you have common staples like cooking oil, salt, pepper, and any spices (like chili powder or cumin)?"</span>
-<span style = 'color: #4171bf'>User: "Yes, I have olive oil, salt, pepper, and chili powder."</span>
-<span style = 'color: #40a33e'>KitchenAssistant: Searches for recipes matching ONLY these items.</span>
-<span style = 'color: #40a33e'>KitchenAssistant: "Great! You can make a *Quick Chicken and Bean Skillet*. Here's how:..."</span>
-<span style = 'color: #4171bf'>User: "How long does that take?"</span>
-<span style = 'color: #40a33e'>KitchenAssistant: "This recipe should take about 20-25 minutes from start to finish."</span>
+<br><span style = 'color: #4171bf'>User: "I'm hungry. What can I make with what I have?"</span>
+<br><span style = 'color: #40a33e'>KitchenAssistant: "I can help with that! Please list all the ingredients you have in your fridge and pantry."</span>
+<br><span style = 'color: #4171bf'>User: "Okay, I have two chicken breasts, an onion, a can of black beans, and some shredded cheddar cheese."</span>
+<br><span style = 'color: #40a33e'>KitchenAssistant: "Got it. And do you have common staples like cooking oil, salt, pepper, and any spices (like chili powder or cumin)?"</span>
+<br><span style = 'color: #4171bf'>User: "Yes, I have olive oil, salt, pepper, and chili powder."</span>
+<br><span style = 'color: #40a33e'>KitchenAssistant: Searches for recipes matching ONLY these items.</span>
+<br><span style = 'color: #40a33e'>KitchenAssistant: "Great! You can make a *Quick Chicken and Bean Skillet*. Here's how:..."</span>
+<br><span style = 'color: #4171bf'>User: "How long does that take?"</span>
+<br><span style = 'color: #40a33e'>KitchenAssistant: "This recipe should take about 20-25 minutes from start to finish."</span>
     
 **Data**
 
@@ -20,11 +20,10 @@ The user will initiate a chat stating they want to cook something but only have 
 3. Implicit LLM Knowledge: The LLM's internal, pre-trained knowledge base of countless recipes, cooking techniques, and ingredient pairings.
 4. Parsed Ingredient List: A structured list (like an array) that the LLM creates internally to represent the user's available items. 
 
-Recipe Output: A structured text response for the user, broken down into:
-
-(Recipe Title)
-(Formatted Ingredient List)
-(Numbered, step-by-step instructions)
+Recipe Output: 
+<br>(Recipe Title)
+<br>(Formatted Ingredient List)
+<br>(Numbered, step-by-step instructions)
 
 **Evaluation**
 
@@ -49,16 +48,16 @@ The user will state their primary fitness or health goal (e.g., "I want a 5-day 
 
 
 **Step-by-step break down:**
-<span style = 'color: #4171bf'>User: "I need a 5-day meal prep plan to help me lose weight."</span>
-<span style = 'color: #40a33e'>NutritionPlanner: "I can definitely build that for you. First, do you have any food allergies, dietary restrictions (like vegan, gluten-free), or strong dislikes (like mushrooms or cilantro)?"</span>
-<span style = 'color: #4171bf'>User: "I'm not allergic to anything, but I hate olives."</span>
-<span style = 'color: #40a33e'>NutritionPlanner: "Got it, no olives! Do you have a specific daily calorie or macro target you're aiming for?"</span>
-<span style = 'color: #4171bf'>User: "No, I have no idea. Can you help with that?"</span>
-<span style = 'color: #40a33e'>NutritionPlanner: "Sure! To estimate your targets for weight loss, I just need your age, weight, height, biological sex, and typical weekly activity level."</span>
-<span style = 'color: #4171bf'>User: "I'm 30, 190 lbs, 5'10", male, and I work a desk job but go to the gym 3 times a week."</span>
-<span style = 'color: #40a33e'>NutritionPlanner-: "Thanks. Based on that, I'd suggest a target of around 2,100 calories per day for sustainable weight loss. Does that sound manageable?"</span>
-<span style = 'color: #4171bf'>User: "Yes, that sounds perfect."</span>
-<span style = 'color: #40a33e'>NutritionPlanne: "Excellent. Here is your 5-Day Weight Loss Meal Prep Plan: *Shopping List:* 3 bell peppers, 2 onions, 1 bag of spinach... *Protein:* 5 lbs chicken breast, 1 dozen eggs... *Pantry:* 1 bag quinoa, olive oil... *Sunday Prep Instructions (Approx. 2 hours):* Cook 3 cups of dry quinoa... *Daily Assembly Plan:* (D1) Breakfast is 3 scrambled eggs with spinach. Lunch is a Quinoa bowl with 6oz sliced chicken, 1/2 cup chopped peppers..."</span>
+<br><span style = 'color: #4171bf'>User: "I need a 5-day meal prep plan to help me lose weight."</span>
+<br><span style = 'color: #40a33e'>NutritionPlanner: "I can definitely build that for you. First, do you have any food allergies, dietary restrictions (like vegan, gluten-free), or strong dislikes (like mushrooms or cilantro)?"</span>
+<br><span style = 'color: #4171bf'>User: "I'm not allergic to anything, but I hate olives."</span>
+<br><span style = 'color: #40a33e'>NutritionPlanner: "Got it, no olives! Do you have a specific daily calorie or macro target you're aiming for?"</span>
+<br><span style = 'color: #4171bf'>User: "No, I have no idea. Can you help with that?"</span>
+<br><span style = 'color: #40a33e'>NutritionPlanner: "Sure! To estimate your targets for weight loss, I just need your age, weight, height, biological sex, and typical weekly activity level."</span>
+<br><span style = 'color: #4171bf'>User: "I'm 30, 190 lbs, 5'10", male, and I work a desk job but go to the gym 3 times a week."</span>
+<br><span style = 'color: #40a33e'>NutritionPlanner-: "Thanks. Based on that, I'd suggest a target of around 2,100 calories per day for sustainable weight loss. Does that sound manageable?"</span>
+<br><span style = 'color: #4171bf'>User: "Yes, that sounds perfect."</span>
+<br><span style = 'color: #40a33e'>NutritionPlanne: "Excellent. Here is your 5-Day Weight Loss Meal Prep Plan: *Shopping List:* 3 bell peppers, 2 onions, 1 bag of spinach... *Protein:* 5 lbs chicken breast, 1 dozen eggs... *Pantry:* 1 bag quinoa, olive oil... *Sunday Prep Instructions (Approx. 2 hours):* Cook 3 cups of dry quinoa... *Daily Assembly Plan:* (D1) Breakfast is 3 scrambled eggs with spinach. Lunch is a Quinoa bowl with 6oz sliced chicken, 1/2 cup chopped peppers..."</span>
 
 **Data**
 
@@ -67,9 +66,10 @@ The user will state their primary fitness or health goal (e.g., "I want a 5-day 
 3. User Profile (Conditional): (Numeric/Text) Age, weight (lbs/kg), height (ft/cm), biological sex, and activity level (e.g., "sedentary," "lightly active," "very active"). This is only needed if the user does not provide their own targets.
 4. User Targets (Conditional): (Numeric) Daily calories, protein (g), carbs (g), fat (g).
 
-Shopping List: A categorized list of all ingredients needed.
-Prep Instructions: A numbered list of bulk cooking tasks.
-Daily Plan: A 5-day schedule, with each day broken down into "Breakfast," "Lunch," "Dinner," and "Snacks," specifying the meal and assembly steps.
+Five Day Plan:
+<br>Shopping List: A categorized list of all ingredients needed.
+<br>Prep Instructions: A numbered list of bulk cooking tasks.
+<br>Daily Plan: A 5-day schedule, with each day broken down into "Breakfast," "Lunch," "Dinner," and "Snacks," specifying the meal and <br>assembly steps.
 
 **Evaluation**
 
