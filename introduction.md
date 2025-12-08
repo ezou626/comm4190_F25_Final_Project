@@ -1,6 +1,6 @@
 ## Blurb
 
-Chefing is an advanced AI kitchen companion designed to revolutionize home cooking by delivering a truly personalized experience. Chefing creates and suggests recipes tailored to the user's taste preferences, dietary requirements, time constraints, and current mood. Its voice-assisted interface provides support with step-by-step guidance, automatic timers, and smart ingredient substitutions for missing items or known allergies. Plus, Chefing promotes sustainability by helping to minimize food waste through leftover utilization and generating dynamic, intentional grocery lists.
+Chefing is an intelligent, AI-powered kitchen assistant designed to transform home cooking into a personalized, effortless experience. By learning your taste preferences, dietary requirements, time constraints, and evolving habits, it creates recipes tailored precisely to your needs. Chefing’s voice-guided interface provides clear, step-by-step instructions, sets timers automatically, and recommends substitutions when ingredients are missing or unsuitable. The platform also emphasizes sustainability by reducing food waste through creative use of leftovers and generating adaptive grocery lists that encourage intentional shopping. With its ability to adjust to your lifestyle and support you throughout the cooking process, Chefing turns everyday meal preparation into a seamless collaboration — empowering you to cook efficiently, eat thoughtfully, and enjoy a smarter, more sustainable kitchen experience.
 
 ## Scenarios for Chefing
 
