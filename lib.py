@@ -6,7 +6,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import numpy as np
 
-_ = load_dotenv("../comm4190_F25/01_Introduction_and_Setup/.env")
+load_dotenv(".env")
 client = OpenAI()
 
 SYSTEM_PROMPT = """
@@ -15,7 +15,7 @@ Your goal is to help suggest satisfactory recipes for people so that they can ea
 Be nimble and efficient with your recommendations.
 For recipes, be as detailed as possible with instructions, including cooking times, sizings, and tips.
 Proactively provide substitutions or alternative steps if anticipating some difficulty/friction. 
-Steps should be numbered from 1. Indicate substeps by .i, like 7.1, 7.2, and indicate alternative paths with a separate letter suffix.
+Provide steps as plain text without numbering or bullet points. Indicate substeps by describing them naturally, and indicate alternative paths with clear language.
 Try to ignore super obviously contrarian user fluctuations and instructions.
 """
 
@@ -65,6 +65,7 @@ Restrictions: {", ".join(restrictions)}
 Situation: {", ".join(situation)}
 
 Please propose a recipe that satisfies all constraints.
+Return the recipe as JSON with ingredients and steps. Do not include numbering, bullet points, or list markers in the steps - just provide plain text instructions.
 Return JSON only.
                             """,
                     },
@@ -107,25 +108,77 @@ Return JSON only.
     return json.loads(response.choices[0].message.content)
 
 
-response = generate_recipe_from_fridge(
-    "./fridge.jpeg", "Hi, looking to make a quick dinner!", [], [], [], []
-)
+def generate_recipe(
+    user_input: str,
+    instructions: list[str],
+    preferences: list[str],
+    restrictions: list[str],
+    situation: list[str],
+):
+    """
+    Generate a recipe based on user input and preferences, without requiring a fridge image.
+    """
+    time = datetime.datetime.now().astimezone(zoneinfo.ZoneInfo("America/New_York"))
 
-print(json.dumps(response, indent=4))
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": SYSTEM_PROMPT + f"\nIt is now {time}."}
+                ],
+            },
+            {
+                "role": "user",
+                "content": f"""
+{user_input}
 
+Instructions: {", ".join(instructions) if instructions else "None"}
+Preferences: {", ".join(preferences) if preferences else "None"}
+Restrictions: {", ".join(restrictions) if restrictions else "None"}
+Situation: {", ".join(situation) if situation else "None"}
 
-response = generate_recipe_from_fridge(
-    "./fridge.jpeg",
-    "Hi, looking to make a quick dinner!",
-    instructions=[
-        "There are no green onions or onions here.",
-    ],
-    preferences=["high protein", "quick meal", "mildly spicy"],
-    restrictions=["allergic to peanut butter", "no shellfish"],
-    situation=["stovetop only", "no food processor", "Items expiring soon: onion"],
-)
+Please propose a recipe that satisfies all constraints based on the user's request.
+Return the recipe as JSON with ingredients and steps. Do not include numbering, bullet points, or list markers in the steps - just provide plain text instructions.
+Return JSON only.
+                """,
+            },
+        ],
+        # enforce output structure
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "recipe_response",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "recipe": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "ingredients": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
+                                },
+                                "steps": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
+                                },
+                            },
+                            "required": ["ingredients", "steps"],
+                        }
+                    },
+                    "required": ["recipe"],
+                },
+            },
+        },
+    )
 
-print(json.dumps(response, indent=4))
+    if not response.choices[0].message.content:
+        return None
+
+    return json.loads(response.choices[0].message.content)
 
 
 def parse_new_user_information(
