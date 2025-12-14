@@ -40,6 +40,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     }
   }
 
+
   const removeImage = () => {
     setImage(null)
     setImagePreview(null)
@@ -83,27 +84,42 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
             accept="image/*"
             ref={fileInputRef}
             onChange={handleImageSelect}
-            className="hidden"
+            className="sr-only"
             id="image-upload"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
             disabled={disabled}
+          />
+          <label 
+            htmlFor="image-upload" 
+            className={`inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors ${disabled ? "cursor-not-allowed opacity-50 pointer-events-none" : "cursor-pointer"}`}
+            aria-label="Upload image"
           >
             <ImageIcon className="h-4 w-4" />
-          </Button>
+          </label>
           <Input
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type a message or upload a fridge image..."
             disabled={disabled}
             className="flex-1"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault()
+                if (message.trim() || image) {
+                  handleSubmit(e as any)
+                }
+              }
+            }}
           />
         </div>
-        <Button type="submit" disabled={disabled || (!message.trim() && !image)}>
+        <Button 
+          type="submit" 
+          disabled={disabled || (!message.trim() && !image)}
+          onClick={(e) => {
+            if (!message.trim() && !image) {
+              e.preventDefault()
+            }
+          }}
+        >
           <Send className="h-4 w-4" />
         </Button>
       </form>

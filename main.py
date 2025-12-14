@@ -12,6 +12,7 @@ import json
 from lib import (
     generate_recipe_from_fridge,
     generate_recipe,
+    detect_recipe_request,
     parse_new_user_information,
     parse_user_profile_information,
     compute_long_term_delta_with_llm,
@@ -62,18 +63,54 @@ def init_db():
     conn = get_db()
     c = conn.cursor()
     
-    # Chat history table
+    # Conversations table
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS conversations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        title TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    
+    # Chat history table (now linked to conversations)
     c.execute("""
     CREATE TABLE IF NOT EXISTS chat (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        conversation_id INTEGER NOT NULL,
         user_id TEXT NOT NULL,
         message TEXT NOT NULL,
         response TEXT NOT NULL,
         has_image BOOLEAN DEFAULT 0,
         image_path TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
     )
     """)
+    
+    # Add conversation_id column if it doesn't exist (migration)
+    try:
+        # Check if column exists
+        c.execute("PRAGMA table_info(chat)")
+        columns = [row[1] for row in c.fetchall()]
+        if 'conversation_id' not in columns:
+            c.execute("ALTER TABLE chat ADD COLUMN conversation_id INTEGER")
+            # Migrate existing messages to a default conversation
+            c.execute("""
+                INSERT INTO conversations (user_id, title, created_at, updated_at)
+                SELECT DISTINCT user_id, 'Chat 1', MIN(created_at), MAX(created_at)
+                FROM chat
+                WHERE conversation_id IS NULL
+                GROUP BY user_id
+            """)
+            c.execute("""
+                UPDATE chat 
+                SET conversation_id = (SELECT id FROM conversations WHERE user_id = chat.user_id LIMIT 1)
+                WHERE conversation_id IS NULL
+            """)
+    except sqlite3.OperationalError:
+        pass  # Column already exists or migration failed
     
     # User profile table (long-term data)
     c.execute("""
@@ -223,16 +260,18 @@ def get_profile():
 async def chat(
     user_message: str = Form(...),
     fridge_image: Optional[UploadFile] = File(None),
+    conversation_id: Optional[str] = Form(None),
 ):
     """
-    Main chat endpoint. Handles both recipe generation (with fridge image) 
-    and information parsing (without image).
+    Main chat endpoint. Handles recipe generation and information parsing.
     
     - If fridge_image is provided: generates a recipe based on fridge contents
-    - If no image: parses new information from user message
+    - If no image but recipe requested: generates a recipe based on preferences
+    - Otherwise: parses new information from user message
     
     Automatically retrieves relevant long-term data using embeddings.
     Updates long-term profile if new persistent information is detected.
+    Creates a new conversation if conversation_id is not provided.
     """
     try:
         # Get current user profile
@@ -256,9 +295,8 @@ async def chat(
             with open(image_path, "wb") as f:
                 shutil.copyfileobj(fridge_image.file, f)
         
-        # Check if user is requesting a recipe (keywords that suggest recipe request)
-        recipe_keywords = ["recipe", "make", "cook", "dish", "meal", "prepare", "suggest", "recommend", "idea", "what should i", "what can i"]
-        is_recipe_request = any(keyword in user_message.lower() for keyword in recipe_keywords)
+        # Check if user is requesting a recipe (using LLM to detect implied requests)
+        is_recipe_request = detect_recipe_request(user_message)
         
         # Process based on whether image is provided or recipe is requested
         if image_path:
@@ -335,15 +373,47 @@ async def chat(
                 "long_term_updates": delta if delta else {},
             }
         
-        # Store chat in database
+        # Get or create conversation
         conn = get_db()
         c = conn.cursor()
+        
+        conv_id = None
+        if conversation_id:
+            try:
+                conv_id = int(conversation_id)
+                # Verify conversation exists and belongs to user
+                c.execute("SELECT id FROM conversations WHERE id = ? AND user_id = ?", (conv_id, USER_ID))
+                if not c.fetchone():
+                    raise HTTPException(status_code=404, detail="Conversation not found")
+            except (ValueError, TypeError):
+                conv_id = None
+        
+        if not conv_id:
+            # Create new conversation
+            title = (user_message[:50] or "New Chat") if user_message else "New Chat"
+            c.execute(
+                """
+                INSERT INTO conversations (user_id, title, updated_at)
+                VALUES (?, ?, CURRENT_TIMESTAMP)
+                """,
+                (USER_ID, title),
+            )
+            conv_id = c.lastrowid
+        
+        # Update conversation updated_at
+        c.execute(
+            "UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            (conv_id,)
+        )
+        
+        # Store chat message in database
         c.execute(
             """
-            INSERT INTO chat (user_id, message, response, has_image, image_path)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO chat (conversation_id, user_id, message, response, has_image, image_path)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
             (
+                conv_id,
                 USER_ID,
                 user_message,
                 json.dumps(response_data),
@@ -435,10 +505,112 @@ async def submit_feedback(feedback: FeedbackRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/conversations")
+def get_conversations():
+    """
+    Get all conversations for the user.
+    Returns conversations ordered by most recently updated.
+    """
+    conn = get_db()
+    c = conn.cursor()
+    c.execute(
+        """
+        SELECT id, title, created_at, updated_at,
+               (SELECT COUNT(*) FROM chat WHERE conversation_id = conversations.id) as message_count
+        FROM conversations 
+        WHERE user_id = ? 
+        ORDER BY updated_at DESC
+        """,
+        (USER_ID,),
+    )
+    rows = c.fetchall()
+    conn.close()
+    
+    conversations = []
+    for row in rows:
+        conversations.append({
+            "id": row["id"],
+            "title": row["title"] or f"Chat {row['id']}",
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+            "message_count": row["message_count"],
+        })
+    
+    return JSONResponse(conversations)
+
+
+@app.post("/api/conversations")
+def create_conversation():
+    """
+    Create a new conversation.
+    """
+    conn = get_db()
+    c = conn.cursor()
+    c.execute(
+        """
+        INSERT INTO conversations (user_id, title, updated_at)
+        VALUES (?, ?, CURRENT_TIMESTAMP)
+        """,
+        (USER_ID, "New Chat"),
+    )
+    conversation_id = c.lastrowid
+    conn.commit()
+    conn.close()
+    
+    return JSONResponse({
+        "id": conversation_id,
+        "title": "New Chat",
+        "created_at": None,
+        "updated_at": None,
+        "message_count": 0,
+    })
+
+
+@app.get("/api/conversations/{conversation_id}/messages")
+def get_conversation_messages(conversation_id: int, limit: int = 100):
+    """
+    Get messages for a specific conversation.
+    Returns messages in chronological order (oldest first).
+    """
+    conn = get_db()
+    c = conn.cursor()
+    
+    # Verify conversation exists and belongs to user
+    c.execute("SELECT id FROM conversations WHERE id = ? AND user_id = ?", (conversation_id, USER_ID))
+    if not c.fetchone():
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    c.execute(
+        """
+        SELECT id, message, response, has_image, image_path, created_at
+        FROM chat 
+        WHERE conversation_id = ? AND user_id = ?
+        ORDER BY created_at ASC 
+        LIMIT ?
+        """,
+        (conversation_id, USER_ID, limit),
+    )
+    rows = c.fetchall()
+    conn.close()
+    
+    messages = []
+    for row in rows:
+        messages.append({
+            "id": row["id"],
+            "message": row["message"],
+            "response": json.loads(row["response"]),
+            "has_image": bool(row["has_image"]),
+            "image_path": row["image_path"],
+            "created_at": row["created_at"],
+        })
+    
+    return JSONResponse(messages)
+
+
 @app.get("/api/history")
 def get_history(limit: int = 50):
     """
-    Get chat history for the user.
+    Get chat history for the user (deprecated - use /api/conversations/{id}/messages instead).
     Returns messages in reverse chronological order (newest first).
     """
     conn = get_db()
@@ -513,7 +685,8 @@ def reset_demo():
         conn = get_db()
         c = conn.cursor()
         
-        # Clear all tables
+        # Clear all tables (CASCADE will handle chat messages)
+        c.execute("DELETE FROM conversations")
         c.execute("DELETE FROM chat")
         c.execute("DELETE FROM user_profile")
         c.execute("DELETE FROM recipe_feedback")

@@ -108,6 +108,45 @@ Return JSON only.
     return json.loads(response.choices[0].message.content)
 
 
+def detect_recipe_request(user_message: str) -> bool:
+    """
+    Use LLM to detect if the user is requesting a recipe, including implied requests.
+    """
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a helpful assistant that determines if a user message is requesting a recipe or meal suggestion. Return only 'yes' or 'no'."
+            },
+            {
+                "role": "user",
+                "content": f"""
+Analyze this user message and determine if they are requesting a recipe or meal suggestion (even if not explicitly stated).
+
+Examples of recipe requests:
+- "I'm hungry for dinner" → yes (implied request)
+- "What should I make?" → yes
+- "Can you suggest something?" → yes (if food-related)
+- "I want to cook something" → yes
+- "I'm allergic to peanuts" → no (just providing information)
+- "I like spicy food" → no (just providing information)
+- "Make me a recipe" → yes
+
+User message: "{user_message}"
+
+Is this a request for a recipe or meal suggestion? Answer only 'yes' or 'no'.
+                """
+            }
+        ],
+        max_tokens=10,
+        temperature=0,
+    )
+    
+    answer = response.choices[0].message.content.strip().lower()
+    return answer.startswith("yes")
+
+
 def generate_recipe(
     user_input: str,
     instructions: list[str],
