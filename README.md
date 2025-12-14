@@ -11,5 +11,4 @@ Through its voice-assisted interface and smart integrations, Chefing walks you t
 The result? Cooking becomes less of a chore and more of a creative partnership between you and your AI sous-chef — helping you cook smarter, eat better, and live more sustainably. Chefing is the future of home cooking, designed for your life, your fridge, and your taste.
 
 ## Video Demo
-
-[Watch the demo video](./demo.mp4)
+https://github.com/user-attachments/assets/eb248715-a37b-4a45-93f9-f41e842b1ff3
