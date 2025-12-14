@@ -108,6 +108,33 @@ Return JSON only.
     return json.loads(response.choices[0].message.content)
 
 
+def generate_conversation_title(user_message: str) -> str:
+    """
+    Generate a short title (3-5 words) for a conversation based on the first message.
+    """
+    if not user_message or len(user_message.strip()) < 3:
+        return "New Chat"
+    
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "system",
+                "content": "Generate a very short title (3-5 words max) for a cooking conversation that starts with this message. Be concise and descriptive. Return only the title, no quotes or punctuation."
+            },
+            {
+                "role": "user",
+                "content": user_message
+            }
+        ],
+        max_tokens=15,
+        temperature=0,
+    )
+    
+    title = response.choices[0].message.content.strip()
+    return title[:50] if title else "New Chat"
+
+
 def detect_recipe_request(user_message: str) -> bool:
     """
     Use LLM to detect if the user is requesting a recipe, including implied requests.

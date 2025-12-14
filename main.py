@@ -13,6 +13,7 @@ from lib import (
     generate_recipe_from_fridge,
     generate_recipe,
     detect_recipe_request,
+    generate_conversation_title,
     parse_new_user_information,
     parse_user_profile_information,
     compute_long_term_delta_with_llm,
@@ -256,6 +257,42 @@ def get_profile():
     return JSONResponse(profile)
 
 
+class ProfileUpdate(BaseModel):
+    """Direct profile update request."""
+    long_term_instructions: List[str]
+    long_term_preferences: List[str]
+    long_term_restrictions: List[str]
+    long_term_situation: List[str]
+
+
+@app.put("/api/profile")
+def update_profile_directly(profile_update: ProfileUpdate):
+    """
+    Directly update user profile with provided data.
+    This allows users to edit their profile manually.
+    """
+    try:
+        update_user_profile(
+            USER_ID,
+            profile_update.long_term_instructions,
+            profile_update.long_term_preferences,
+            profile_update.long_term_restrictions,
+            profile_update.long_term_situation,
+        )
+        
+        return JSONResponse({
+            "success": True,
+            "profile": {
+                "long_term_instructions": profile_update.long_term_instructions,
+                "long_term_preferences": profile_update.long_term_preferences,
+                "long_term_restrictions": profile_update.long_term_restrictions,
+                "long_term_situation": profile_update.long_term_situation,
+            }
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/api/chat")
 async def chat(
     user_message: str = Form(...),
@@ -389,8 +426,8 @@ async def chat(
                 conv_id = None
         
         if not conv_id:
-            # Create new conversation
-            title = (user_message[:50] or "New Chat") if user_message else "New Chat"
+            # Create new conversation with LLM-generated title
+            title = generate_conversation_title(user_message)
             c.execute(
                 """
                 INSERT INTO conversations (user_id, title, updated_at)
@@ -400,11 +437,25 @@ async def chat(
             )
             conv_id = c.lastrowid
         
-        # Update conversation updated_at
+        # Check if this is the first message and title needs to be generated
         c.execute(
-            "UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-            (conv_id,)
+            "SELECT title, (SELECT COUNT(*) FROM chat WHERE conversation_id = ?) as msg_count FROM conversations WHERE id = ?",
+            (conv_id, conv_id)
         )
+        row = c.fetchone()
+        if row and row[1] == 0 and (not row[0] or row[0] == "New Chat"):
+            # First message - generate a proper title
+            new_title = generate_conversation_title(user_message)
+            c.execute(
+                "UPDATE conversations SET title = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                (new_title, conv_id)
+            )
+        else:
+            # Just update the timestamp
+            c.execute(
+                "UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                (conv_id,)
+            )
         
         # Store chat message in database
         c.execute(

@@ -311,6 +311,7 @@ function App() {
           messages={messages.filter((m) => m.id > 0)}
           isOpen={showProfilePanel}
           onClose={() => setShowProfilePanel(false)}
+          onProfileUpdate={(updatedProfile) => setProfile(updatedProfile)}
         />
       )}
     </div>
