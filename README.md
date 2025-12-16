@@ -1,5 +1,7 @@
-# comm4190_F25_Final_Project
-Final Project for COMM 4190 at UPenn: Cheffing
+# Chefing: Your Own Little Sous Chef
+Final Project for COMM 4190 at UPenn: Chefing
+
+![Simply delicious, intelligently done](logo.png)
 
 ## Creators
 Parsa Idehpour, Joy Wang, Eric Zou
@@ -12,3 +14,9 @@ The result? Cooking becomes less of a chore and more of a creative partnership b
 
 ## Video Demo
 https://github.com/user-attachments/assets/eb248715-a37b-4a45-93f9-f41e842b1ff3
+
+## Journey
+
+[Our Initial Ideas](comm4190_F25/comm4190_F25_Final_Project/ideas)
+[Selecting Chefing](comm4190_F25/comm4190_F25_Final_Project/introduction.md)
+[Prompt Development](comm4190_F25/comm4190_F25_Final_Project/PromptDevelopment.ipynb)
