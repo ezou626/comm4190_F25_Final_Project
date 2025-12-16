@@ -17,6 +17,6 @@ https://github.com/user-attachments/assets/eb248715-a37b-4a45-93f9-f41e842b1ff3
 
 ## Journey
 
-[Our Initial Ideas](comm4190_F25_Final_Project/ideas)
+[Our Initial Ideas](ideas)
 [Selecting Chefing](introduction.md)
-[Prompt Development](comm4190_F25_Final_Project/PromptDevelopment.ipynb)
+[Prompt Development](PromptDevelopment.ipynb)
