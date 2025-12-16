@@ -17,6 +17,6 @@ https://github.com/user-attachments/assets/eb248715-a37b-4a45-93f9-f41e842b1ff3
 
 ## Journey
 
-[Our Initial Ideas](ideas)
-[Selecting Chefing](introduction.md)
+[Our Initial Ideas](ideas)<br>
+[Selecting Chefing](introduction.md)<br>
 [Prompt Development](PromptDevelopment.ipynb)
