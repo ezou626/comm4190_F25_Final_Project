@@ -3,6 +3,8 @@ Final Project for COMM 4190 at UPenn: Chefing
 
 ![Simply delicious, intelligently done](logo1.png)
 
+
+
 ## Creators
 Parsa Idehpour, Joy Wang, Eric Zou
 
