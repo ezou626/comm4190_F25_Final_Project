@@ -38,8 +38,19 @@ This is a Vite-managed frontend with TypeScript, Tailwind CSS.
 - Frontend Build: [static](static)
 - Frontend Source: [frontend](frontend)
 
-### Env Requirements
-You will need a .env file with an OpenAI API key.
+### How to Run
+You will need a .env file with an OpenAI API key. See [.env.example](.env.example) for a template
 ```env
 OPENAI_API_KEY=...
 ```
+
+You will also need to have Python installed locally and a way to install the requirements from the pyproject.toml file. We use uv:
+```bash
+# cd to the root dir of this repo
+uv sync
+uv run fastapi run main.py
+```
+
+Then, navigate to localhost:8000 to see the demonstrator.
+
+Install uv [here](https://docs.astral.sh/uv/getting-started/installation/).
