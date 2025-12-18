@@ -37,3 +37,9 @@ This is a Vite-managed frontend with TypeScript, Tailwind CSS.
 - Uploads (Fridge Picture in Demo): [uploads](uploads)
 - Frontend Build: [static](static)
 - Frontend Source: [frontend](frontend)
+
+### Env Requirements
+You will need a .env file with an OpenAI API key.
+```env
+OPENAI_API_KEY=...
+```
