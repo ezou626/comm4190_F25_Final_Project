@@ -22,3 +22,18 @@ https://github.com/user-attachments/assets/eb248715-a37b-4a45-93f9-f41e842b1ff3
 [Our Initial Ideas](ideas)<br>
 [Selecting Chefing](introduction.md)<br>
 [Prompt Development](PromptDevelopment.ipynb)
+
+## Code Organization
+The frontend is managed by npm and the backend is managed by uv.
+
+### Backend (Root Directory)
+This is a FastAPI demonstrator with a single, local user supporting a chat interface with uploads stored on machine and an sqlite database. This app also serves static files.
+- Boilerplate: [.python-version](.python-version), [pyproject.toml](pyproject.toml), [uv.lock](uv.lock)
+- Main Webserver Logic: [main.py](main.py)
+- Prompts (Transformed Notebook): [lib.py][lib.py]
+
+### Frontend
+This is a Vite-managed frontend with TypeScript, Tailwind CSS.
+- Uploads (Fridge Picture in Demo): [uploads](uploads)
+- Frontend Build: [static](static)
+- Frontend Source: [frontend](frontend)
