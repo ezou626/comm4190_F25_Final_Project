@@ -30,7 +30,7 @@ The frontend is managed by npm and the backend is managed by uv.
 This is a FastAPI demonstrator with a single, local user supporting a chat interface with uploads stored on machine and an sqlite database. This app also serves static files.
 - Boilerplate: [.python-version](.python-version), [pyproject.toml](pyproject.toml), [uv.lock](uv.lock)
 - Main Webserver Logic: [main.py](main.py)
-- Prompts (Transformed Notebook): [lib.py][lib.py]
+- Prompts (Transformed Notebook): [lib.py](lib.py)
 
 ### Frontend
 This is a Vite-managed frontend with TypeScript, Tailwind CSS.
